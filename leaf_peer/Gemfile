@@ -1,0 +1,8 @@
+source "https://rubygems.org"
+
+gem "bundler"
+gem "sinatra"
+gem "pry"
+gem 'listen', '~> 3.0'
+gem "httparty"
+gem "dotenv"
