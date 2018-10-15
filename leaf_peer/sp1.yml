@@ -1,0 +1,27 @@
+peer1:
+  DIRECTORY: "../leaf_peer/sp1/peer1"
+  PEER_HOST: "http://localhost:4001"
+  PEER_PORT: 4001
+  PEER_ID: "peer1"
+  INDEX_HOST: "http://localhost:4000"
+
+peer2:
+  DIRECTORY: "../leaf_peer/sp1/peer2"
+  PEER_HOST: "http://localhost:4002"
+  PEER_PORT: 4002
+  PEER_ID: "peer2"
+  INDEX_HOST: "http://localhost:4000"
+
+peer3:
+  DIRECTORY: "../leaf_peer/sp1/peer3"
+  PEER_HOST: "http://localhost:4003"
+  PEER_PORT: 4003
+  PEER_ID: "peer3"
+  INDEX_HOST: "http://localhost:4000"
+
+peer4:
+  DIRECTORY: "../leaf_peer/sp1/peer4"
+  PEER_HOST: "http://localhost:4004"
+  PEER_PORT: 4004
+  PEER_ID: "peer4"
+  INDEX_HOST: "http://localhost:4000"

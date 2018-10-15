@@ -1,0 +1,49 @@
+super_peer1:
+  PEER_HOST: "http://localhost:4000"
+  PEER_PORT: 4000
+  PEER_ID: "super_peer1"
+
+super_peer2:
+  PEER_HOST: "http://localhost:4100"
+  PEER_PORT: 4100
+  PEER_ID: "super_peer2"
+
+super_peer3:
+  PEER_HOST: "http://localhost:4200"
+  PEER_PORT: 4200
+  PEER_ID: "super_peer3"
+
+super_peer4:
+  PEER_HOST: "http://localhost:4300"
+  PEER_PORT: 4300
+  PEER_ID: "super_peer4"
+
+super_peer5:
+  PEER_HOST: "http://localhost:4400"
+  PEER_PORT: 4400
+  PEER_ID: "super_peer5"
+
+super_peer6:
+  PEER_HOST: "http://localhost:4500"
+  PEER_PORT: 4500
+  PEER_ID: "super_peer6"
+
+super_peer7:
+  PEER_HOST: "http://localhost:4600"
+  PEER_PORT: 4600
+  PEER_ID: "super_peer7"
+
+super_peer8:
+  PEER_HOST: "http://localhost:4700"
+  PEER_PORT: 4700
+  PEER_ID: "super_peer8"
+
+super_peer9:
+  PEER_HOST: "http://localhost:4800"
+  PEER_PORT: 4800
+  PEER_ID: "super_peer9"
+
+super_peer10:
+  PEER_HOST: "http://localhost:4900"
+  PEER_PORT: 4900
+  PEER_ID: "super_peer10"

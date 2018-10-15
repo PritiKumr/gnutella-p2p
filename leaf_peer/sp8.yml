@@ -1,0 +1,27 @@
+peer1:
+  DIRECTORY: "../leaf_peer/sp8/peer1"
+  PEER_HOST: "http://localhost:4701"
+  PEER_PORT: 4701
+  PEER_ID: "peer1"
+  INDEX_HOST: "http://localhost:4700"
+
+peer2:
+  DIRECTORY: "../leaf_peer/sp8/peer2"
+  PEER_HOST: "http://localhost:4702"
+  PEER_PORT: 4702
+  PEER_ID: "peer2"
+  INDEX_HOST: "http://localhost:4700"
+
+peer3:
+  DIRECTORY: "../leaf_peer/sp8/peer3"
+  PEER_HOST: "http://localhost:4703"
+  PEER_PORT: 4703
+  PEER_ID: "peer3"
+  INDEX_HOST: "http://localhost:4700"
+
+peer4:
+  DIRECTORY: "../leaf_peer/sp8/peer4"
+  PEER_HOST: "http://localhost:4704"
+  PEER_PORT: 4704
+  PEER_ID: "peer4"
+  INDEX_HOST: "http://localhost:4700"

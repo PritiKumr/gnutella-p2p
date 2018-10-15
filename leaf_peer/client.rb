@@ -2,23 +2,30 @@ require 'sinatra'
 require "listen"
 require "httparty"
 require 'pry'
-
+require 'fileutils'
 require 'dotenv'
-Dotenv.load("#{ENV['PEER_ID']}.env")
+require 'yaml'
+config = YAML::load(File.open("#{ENV['SP_ID']}.yml"))
 
 # All instance variables are designed to take values from the environmental files.
 # Sample:
-# @watching_directory = /Users/pinki/academics/AOS/p2p/peer/peer1
-# @peer_host = http://localhost:3001
-# @peer_id = 3001
-# @index_server_host = http://localhost:4567
+# @watching_directory = /Users/pinki/academics/AOS/p2p/leaf_peer/peer1
+# @peer_host = http://localhost:4101
+# @peer_id = 4101
+# @index_server_host = http://localhost:4100
+@watching_directory = config[ENV['PEER_ID']]['DIRECTORY']
+@peer_host = config[ENV['PEER_ID']]['PEER_HOST']
+@peer_id = config[ENV['PEER_ID']]['PEER_ID']
+@index_server_host = config[ENV['PEER_ID']]['INDEX_HOST']
 
-@watching_directory = ENV['DIRECTORY']
-@peer_host = ENV['PEER_HOST']
-@peer_id = ENV['PEER_ID']
-@index_server_host = ENV['INDEX_HOST']
+# Creates peer directories on Initialization
+unless File.directory?(@watching_directory)
+  FileUtils.mkdir_p(@watching_directory)
+end
 
-# Peer client attenpts to register with the index server on initial setup.
+puts "----------**********************************************************************************--------"
+
+# Peer client attenpts to register with its super peer.
 def register_peer
   puts "Registering with Index Server at #{@index_server_host}\n"
   begin 
@@ -33,16 +40,20 @@ def register_peer
   puts "Successfully registered with Index Server - #{@peer_id}"
 end
 
+
+# Method executes when leaf peer has a new file added to its path
 def file_added file_path
   puts "File added - #{file_path} to #{@peer_id}"
   update_file_on_index 'add', file_path
 end
 
+# When file from leaf peer directory is removed
 def file_removed file_path
   puts "File removed - #{file_path} to #{@peer_id}"
   update_file_on_index 'remove', file_path
 end
 
+# An update sent to Super Peer to make note of its directory changes.
 def update_file_on_index op, file_path
   begin 
     HTTParty.post(

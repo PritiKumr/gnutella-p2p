@@ -3,14 +3,18 @@ require 'pry'
 require "httparty"
 require 'dotenv'
 
-Dotenv.load("#{ENV['PEER_ID']}.env")
+require 'yaml'
+require 'fileutils'
+config = YAML::load(File.open('super_peer.yml'))
 
 set :local_url, "http://localhost:"
-set :port, ENV['PEER_PORT']
+set :port, config[ENV['PEER_ID']]['PEER_PORT']
 set :leaf_peers, {}
 
-left = ENV['PEER_PORT'] == '4001' ? '4003' : ENV['PEER_PORT'].to_i - 1 
-right = ENV['PEER_PORT'] == '4003' ? '4001' : ENV['PEER_PORT'].to_i + 1 
+# Static configuration of all the neighbouring peers.
+left = config[ENV['PEER_ID']]['PEER_PORT'] == 4000 ? 4900 : config[ENV['PEER_ID']]['PEER_PORT'].to_i - 100
+right = config[ENV['PEER_ID']]['PEER_PORT'] == 4900 ? 4000 : config[ENV['PEER_ID']]['PEER_PORT'].to_i + 100
+
 set :neighbour_peers, {
   "left": left,
   "right": right
@@ -19,14 +23,14 @@ set :neighbour_peers, {
 set :files, {}
 set :messages, []
 
-puts "Super Peer starting..."
+puts "Super Peer starting - #{ENV['PEER_ID']}..."
 
-# Index server registers peers once they connect, adds it to registry if it isn't already present.
+# Super Peer registers leaf peers once they connect, adds it to registry if it isn't already present.
 post '/register_peer' do
   if already_registered?
     puts "Peer #{params['peer_id']} already registered"
   else
-    # Registering peer to the index server by adding it to the leaf_peers data structure.
+    # Registering peer to the super peer by adding it to the leaf_peers data structure.
     settings.leaf_peers[params['peer_id']] = {
       host: params['host'],
       peer_id: params['peer_id']
@@ -54,26 +58,27 @@ get '/file_index' do
 end
 
 get '/search/:query' do
-  content_type :json
-  return "Timeout".to_json if condition_checks(params)
+  return false if condition_checks(params, config)
   settings.messages << params
   search_result = search_files(params, params[:query])
+  # TTL is reduced whenever a queryHit or a queryMiss is encountered
   params[:ttl] = params[:ttl].to_i - 1
-  # If file found not found in leaf peers
-  if search_result.empty?
+  # If file found not found in current super peer registry and it is a queryMiss request.
+  if search_result.empty? and params[:hit] != "true"
     puts "Query MISS ---- Request sent to next Super Peer - #{settings.local_url}:#{settings.neighbour_peers[:right]} -- TTL - #{params[:ttl]}"
-    params[:address] = ENV['PEER_HOST']
+    params[:address] = config[ENV['PEER_ID']]['PEER_HOST']
     params[:leaf] = false
     HTTParty.get("#{settings.local_url}#{settings.neighbour_peers[:right]}/search/#{params[:query]}",
     {
       body: params 
     }).parsed_response
   else
-    # When the previous request was from a leaf node
+    # When file found and it is a qury Hit request
     if params[:requester_address] == params[:address]
       puts "Download request forwarded to Super Peer Server to process download."
+      # Download request is sent to the leaf peer that has the requested file.
       HTTParty.post(
-          "#{settings.leaf_peers[search_result.first[:peer_id]][:host]}/send_file", {
+          "#{params[:sender_address]}/send_file", {
             body: { 
               file_name: params[:file_name],
               dest_folder: params[:dest_folder]
@@ -81,8 +86,16 @@ get '/search/:query' do
           }
         )
     else
+      if params[:hit] == "true"
+        params[:address] = settings.local_url.to_s + settings.neighbour_peers[:left].to_s
+      else
+        # New params are added when a Query Hit condition is met.
+        params[:hit] = "true"
+        params[:ttl] = 10
+        params[:sender_address] = settings.leaf_peers[search_result.first[:peer_id]][:host]
+      end
       puts "Query HIT ----- Back propogation request passed to - #{params[:address]}"
-      params[:source_address] = 
+      # Back Propogation of Query Hit starts
       HTTParty.get("#{params[:address]}/search/#{params[:query]}",
       {
         body: params 
@@ -171,7 +184,6 @@ def search_files params, query
   end.compact
 end
 
-def condition_checks params
+def condition_checks params, config
   return true if params[:ttl].to_i <= 0
-  return true if params[:address] == ENV['PEER_HOST']
 end
